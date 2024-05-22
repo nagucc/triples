@@ -1,7 +1,9 @@
+import { ITriple } from "nagu-triples-types";
 import { execute, connectionToMysql } from "./mysql.js";
 import notions, { Notion } from './notions.js';
 
-export class Triple {
+
+export class Triple implements ITriple{
   constructor(public id: number, public subject, public predicate, public object) {
     this.id = id;
     this.subject = subject;
@@ -17,7 +19,7 @@ const row2Triple = (row) => (new Triple(
   new Notion<string>(row.object, row.o_id),
 ));
 
-export const getById = async (id: number, options: any): Promise<Triple> => {
+export const getById = async (id: number, options: any): Promise<ITriple> => {
   const [ rows, ] = await execute(`SELECT triples.id, s.id AS s_id, s.name AS subject, p.id AS p_id, p.name AS predicate, o.id AS o_id, o.name AS object 
     FROM triples 
     LEFT JOIN notions as s ON triples.subject = s.id 
@@ -42,7 +44,7 @@ const rawInsert = async (subject, predicate, object, options) => {
   return result.insertId;
 }
 
-export const listByS = async (subject: Notion<any> | string, options: any): Promise<Array<Triple>> => {
+export const listByS = async (subject: Notion<any> | string, options: any): Promise<Array<ITriple>> => {
   if (!(subject instanceof notions.Notion)) subject = new notions.Notion(subject.toString());
   // 判断subject是对象还是字符串，来决定where子句怎么写
   let where_claude = `WHERE triples.subject = '${subject.id}'`;
@@ -56,7 +58,7 @@ export const listByS = async (subject: Notion<any> | string, options: any): Prom
   return rows.map(row => row2Triple(row));
 }
 
-export const listByO = async (object: Notion<any>|string, options): Promise<Array<Triple>> => {
+export const listByO = async (object: Notion<any>|string, options): Promise<Array<ITriple>> => {
   if (!(object instanceof notions.Notion)) object = new notions.Notion(object.toString());
   // 判断object是对象还是字符串，来决定where子句怎么写
   let where_claude = `WHERE triples.object = '${object.id}'`;
@@ -71,7 +73,7 @@ export const listByO = async (object: Notion<any>|string, options): Promise<Arra
   return rows.map(row => row2Triple(row));
 }
 
-export const listByP = async (predicate: Notion<any>|string, options): Promise<Array<Triple>> => {
+export const listByP = async (predicate: Notion<any>|string, options): Promise<Array<ITriple>> => {
   if (!(predicate instanceof notions.Notion)) predicate = new notions.Notion(predicate.toString());
   // 判断 predicate 是对象还是字符串，来决定where子句怎么写
   let where_claude = `WHERE triples.predicate = '${predicate.id}'`;
@@ -86,7 +88,7 @@ export const listByP = async (predicate: Notion<any>|string, options): Promise<A
   return rows.map(row => row2Triple(row));
 }
 
-export const listBySP = async (subject: Notion<any>|string, predicate: Notion<any>|string, options): Promise<Array<Triple>> => {
+export const listBySP = async (subject: Notion<any>|string, predicate: Notion<any>|string, options): Promise<Array<ITriple>> => {
   // 判断 subject, predicate 是对象还是字符串，来决定where子句怎么写
   if (!(subject instanceof notions.Notion)) subject = new notions.Notion(subject.toString());
   let subject_criteria = `triples.subject = '${subject.id}'`;
@@ -106,7 +108,7 @@ export const listBySP = async (subject: Notion<any>|string, predicate: Notion<an
   return rows.map(row => row2Triple(row));
 }
 
-export const listByPO = async (predicate: Notion<any>|string, object: Notion<any>|string, options): Promise<Array<Triple>> => {
+export const listByPO = async (predicate: Notion<any>|string, object: Notion<any>|string, options): Promise<Array<ITriple>> => {
   // 判断 predicate, object 是对象还是字符串，来决定where子句怎么写
   if (!(object instanceof notions.Notion)) object = new notions.Notion(object.toString());
   let object_criteria = `triples.subject = '${object.id}'`;
@@ -126,7 +128,7 @@ export const listByPO = async (predicate: Notion<any>|string, object: Notion<any
   return rows.map(row => row2Triple(row));
 }
 
-export const listBySO = async (subject: Notion<any>|string, object: Notion<any>|string, options): Promise<Array<Triple>> => {
+export const listBySO = async (subject: Notion<any>|string, object: Notion<any>|string, options): Promise<Array<ITriple>> => {
   // 判断 subject, object 是对象还是字符串，来决定where子句怎么写
   if (!(subject instanceof notions.Notion)) subject = new notions.Notion(subject.toString());
   let subject_criteria = `triples.subject = '${subject.id}'`;
@@ -146,7 +148,7 @@ export const listBySO = async (subject: Notion<any>|string, object: Notion<any>|
   return rows.map(row => row2Triple(row));
 }
 
-export const getBySPO = async (subject: Notion<any>|string, predicate: Notion<any>|string, object: Notion<any>|string, options): Promise<Triple> => {
+export const getBySPO = async (subject: Notion<any>|string, predicate: Notion<any>|string, object: Notion<any>|string, options): Promise<ITriple> => {
 // 判断 subject, predicate, object 是对象还是字符串，来决定where子句怎么写
 if (!(subject instanceof notions.Notion)) subject = new notions.Notion(subject.toString());
 let subject_criteria = `triples.subject = '${subject.id}'`;
@@ -172,7 +174,7 @@ if (!object.id) object_criteria = `triples.object = (SELECT id FROM notions WHER
   else return null;
 }
 
-export const getOrCreate = async (subject: Notion<any>|string, predicate: Notion<any>|string, object: Notion<any>|string, options: { connection: any; }): Promise<Triple> => {
+export const getOrCreate = async (subject: Notion<any>|string, predicate: Notion<any>|string, object: Notion<any>|string, options: { connection: any; }): Promise<ITriple> => {
   console.log(`Triples.getOrCrate::s(${subject}, p(${predicate}), o(${object}))`);
   let conn = options.connection;
   let autoEnd = false;

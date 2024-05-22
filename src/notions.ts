@@ -1,6 +1,7 @@
 import { execute } from "./mysql.js";
+import { INotion } from "nagu-triples-types";
 
-export class Notion<T> {
+export class Notion<T> implements INotion<T> {
   constructor(public name: T, public id?: number) {
     this.name = name;
     this.id = id;
