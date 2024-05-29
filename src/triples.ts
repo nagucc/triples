@@ -175,7 +175,8 @@ if (!object.id) object_criteria = `triples.object = (SELECT id FROM notions WHER
 }
 
 export const getOrCreate = async (subject: Notion<any>|string, predicate: Notion<any>|string, object: Notion<any>|string, options: { connection: any; }): Promise<ITriple> => {
-  console.log(`Triples.getOrCrate::s(${subject}, p(${predicate}), o(${object}))`);
+  if (!subject || !predicate || !object) throw new Error('subject,predicate和object都不能为空');
+  console.log(`Triples.getOrCreate::s(${subject}, p(${predicate}), o(${object}))`);
   let conn = options.connection;
   let autoEnd = false;
   if (!conn) {
