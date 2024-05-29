@@ -1,5 +1,5 @@
 import { env } from 'node:process';
-import mysql from 'mysql2/promise';
+import * as mysql from 'mysql2/promise';
 
 export const connectionToMysql = async (options) => {
   options.host = options.host || env.OWL_DB_HOST;
